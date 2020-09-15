@@ -12,7 +12,7 @@ func MakeHttpHandler(s Service) http.Handler {
 	router := mux.NewRouter()
 	hh := httpHandlers{service: s}
 
-	router.HandleFunc("/feedrefresh", hh.refreshFeed)
+	router.HandleFunc("/", hh.refreshFeed)
 
 	return router
 }

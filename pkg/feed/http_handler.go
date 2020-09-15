@@ -15,10 +15,10 @@ func MakeHttpHandler(s Service) http.Handler {
 	router := mux.NewRouter()
 	hh := httpHandlers{service: s}
 
-	router.HandleFunc("/feed/articles", hh.getArticles).Methods("GET")
-	router.HandleFunc("/feed/articles/{id}", hh.getArticle).Methods("GET")
-	router.HandleFunc("/feed/categories", hh.getCategories).Methods("GET")
-	router.HandleFunc("/feed/providers", hh.getProviders).Methods("GET")
+	router.HandleFunc("/articles", hh.getArticles).Methods("GET")
+	router.HandleFunc("/articles/{id}", hh.getArticle).Methods("GET")
+	router.HandleFunc("/categories", hh.getCategories).Methods("GET")
+	router.HandleFunc("/providers", hh.getProviders).Methods("GET")
 
 	return router
 }

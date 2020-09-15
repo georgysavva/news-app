@@ -24,7 +24,7 @@ func main() {
 	feedRefreshService := feedrefresh.NewService(storage, articlesDownloader, providerURLs)
 	feedHandler := feed.MakeHttpHandler(feedService)
 	feedrefreshHandler := feedrefresh.MakeHttpHandler(feedRefreshService)
-	http.Handle("/feed/", feedHandler)
-	http.Handle("/feedrefresh", feedrefreshHandler)
+	http.Handle("/feed/", http.StripPrefix("/feed", feedHandler))
+	http.Handle("/feedrefresh/", http.StripPrefix("/feedrefresh", feedrefreshHandler))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
