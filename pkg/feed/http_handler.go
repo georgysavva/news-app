@@ -1,23 +1,24 @@
 package feed
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+
+	"github.com/georgysavva/news-app/pkg/httputil"
 )
 
 func MakeHttpHandler(s Service) http.Handler {
-	router := httprouter.New()
-	hh := httpHandlers{}
+	router := mux.NewRouter()
+	hh := httpHandlers{service: s}
 
-	router.GET("/articles", hh.getArticles)
-	router.GET("/articles/:id", hh.getArticle)
-	router.GET("/categories", hh.getCategories)
-	router.GET("/providers", hh.getProviders)
+	router.HandleFunc("/feed/articles", hh.getArticles).Methods("GET")
+	router.HandleFunc("/feed/articles/{id}", hh.getArticle).Methods("GET")
+	router.HandleFunc("/feed/categories", hh.getCategories).Methods("GET")
+	router.HandleFunc("/feed/providers", hh.getProviders).Methods("GET")
 
 	return router
 }
@@ -26,62 +27,63 @@ type httpHandlers struct {
 	service Service
 }
 
-func (hh httpHandlers) getArticles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (hh httpHandlers) getArticles(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	categories := queryParams["categories"]
 	providers := queryParams["providers"]
 	articles, err := hh.service.GetArticles(r.Context(), WithCategories(categories), WithProvides(providers))
 	if err != nil {
-		logUnhandledError(errors.Wrap(err, "get articles request failed"))
-		httpInternalServerError(w)
+		logError(errors.Wrap(err, "get articles request failed"))
+		httputil.InternalServerError(w)
+		return
 	}
-	if err := json.NewEncoder(w).Encode(articles); err != nil {
-		log.Println("Can not encode or write articles data into http response")
+	if err := httputil.ReturnJSONData(w, articles); err != nil {
+		logError(errors.Wrap(err, "can not return articles list"))
 	}
 }
 
-func (hh httpHandlers) getArticle(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	articleID := params.ByName("id")
+func (hh httpHandlers) getArticle(w http.ResponseWriter, r *http.Request) {
+	articleID := mux.Vars(r)["id"]
 
 	a, err := hh.service.GetArticle(r.Context(), articleID)
 	if err != nil {
-		logUnhandledError(errors.Wrap(err, "get article request failed"))
-		httpInternalServerError(w)
+		logError(errors.Wrap(err, "get article request failed"))
+		httputil.InternalServerError(w)
+		return
 	}
 	if a == nil {
 		http.Error(w, fmt.Sprintf("Article %s not found", articleID), http.StatusNotFound)
+		return
 	}
-	if err := json.NewEncoder(w).Encode(a); err != nil {
-		log.Println("Can not encode or write article data into http response")
+	if err := httputil.ReturnJSONData(w, a); err != nil {
+		logError(errors.Wrap(err, "can not return article object"))
 	}
 }
 
-func (hh httpHandlers) getCategories(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (hh httpHandlers) getCategories(w http.ResponseWriter, r *http.Request) {
 	categories, err := hh.service.GetCategories(r.Context())
 	if err != nil {
-		logUnhandledError(errors.Wrap(err, "get categories request failed"))
-		httpInternalServerError(w)
+		logError(errors.Wrap(err, "get categories request failed"))
+		httputil.InternalServerError(w)
+		return
 	}
-	if err := json.NewEncoder(w).Encode(categories); err != nil {
-		log.Println("Can not encode or write categories list into http response")
+	if err := httputil.ReturnJSONData(w, categories); err != nil {
+		logError(errors.Wrap(err, "can not return categories list"))
 	}
 }
 
-func (hh httpHandlers) getProviders(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (hh httpHandlers) getProviders(w http.ResponseWriter, r *http.Request) {
 	providers, err := hh.service.GetProviders(r.Context())
 	if err != nil {
-		logUnhandledError(errors.Wrap(err, "get categories failed"))
-		httpInternalServerError(w)
+		logError(errors.Wrap(err, "get providers request failed"))
+		httputil.InternalServerError(w)
+		return
 	}
-	if err := json.NewEncoder(w).Encode(providers); err != nil {
-		log.Println("Can not encode or write providers list into http response")
+	if err := httputil.ReturnJSONData(w, providers); err != nil {
+		logError(errors.Wrap(err, "can not return providers list"))
 	}
 }
 
-func httpInternalServerError(w http.ResponseWriter) {
-	http.Error(w, "Internal server error", http.StatusInternalServerError)
-}
-
-func logUnhandledError(err error) {
+func logError(err error) {
 	log.Printf("Unhandled error: %s\n", err)
 }

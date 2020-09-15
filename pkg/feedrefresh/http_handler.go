@@ -4,15 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 )
 
 func MakeHttpHandler(s Service) http.Handler {
-	router := httprouter.New()
-	hh := httpHandlers{}
+	router := mux.NewRouter()
+	hh := httpHandlers{service: s}
 
-	router.PUT("/articles", hh.refreshArticles)
+	router.HandleFunc("/feedrefresh", hh.refreshFeed)
 
 	return router
 }
@@ -21,8 +21,8 @@ type httpHandlers struct {
 	service Service
 }
 
-func (hh httpHandlers) refreshArticles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	err := hh.service.RefreshArticles(r.Context())
+func (hh httpHandlers) refreshFeed(w http.ResponseWriter, r *http.Request) {
+	err := hh.service.RefreshFeed(r.Context())
 	if err != nil {
 		logUnhandledError(errors.Wrap(err, "refresh articles request failed"))
 		httpInternalServerError(w)

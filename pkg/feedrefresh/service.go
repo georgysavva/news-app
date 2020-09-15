@@ -9,7 +9,7 @@ import (
 )
 
 type Service interface {
-	RefreshArticles(ctx context.Context) error
+	RefreshFeed(ctx context.Context) error
 }
 
 type Repository interface {
@@ -27,14 +27,14 @@ type serviceImpl struct {
 }
 
 func NewService(repository Repository, downloader Downloader, providerURLs []string) Service {
-	return &serviceImpl{
+	return serviceImpl{
 		repository:   repository,
 		downloader:   downloader,
 		providerURLs: providerURLs,
 	}
 }
 
-func (s *serviceImpl) RefreshArticles(ctx context.Context) error {
+func (s serviceImpl) RefreshFeed(ctx context.Context) error {
 	var freshArticles []*article.Article
 	// We could optimize this part and download for each provider in parallel.
 	for _, pURL := range s.providerURLs {

@@ -3,6 +3,8 @@ package download
 import (
 	"context"
 	"encoding/base64"
+	"net/http"
+	"time"
 
 	"github.com/mmcdole/gofeed"
 
@@ -15,11 +17,15 @@ type Downloader struct {
 	fp *gofeed.Parser
 }
 
-func NewDownloader() *Downloader {
-	return &Downloader{fp: gofeed.NewParser()}
+func NewDownloader() Downloader {
+	parser := gofeed.NewParser()
+
+	// Ideally, this should be configurable.
+	parser.Client = &http.Client{Timeout: time.Second * 5}
+	return Downloader{fp: parser}
 }
 
-func (d *Downloader) DownloadArticles(ctx context.Context, providerURL string) ([]*article.Article, error) {
+func (d Downloader) DownloadArticles(ctx context.Context, providerURL string) ([]*article.Article, error) {
 	feed, err := d.fp.ParseURLWithContext(providerURL, ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "gofeed could not download or parse the feed")

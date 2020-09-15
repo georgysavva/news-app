@@ -15,10 +15,6 @@ type Storage struct {
 	providersSet  map[string]struct{}
 }
 
-func NewStorage() *Storage {
-	return &Storage{}
-}
-
 func (s *Storage) ReplaceArticles(_ context.Context, articles []*article.Article) error {
 	articlesIndex := map[string]*article.Article{}
 	categoriesSet := map[string]struct{}{}
@@ -78,10 +74,8 @@ func (s *Storage) retrieveArticles(categories, providers []string) []*article.Ar
 	defer s.RUnlock()
 	var articles []*article.Article
 	for _, a := range s.articlesIndex {
-		if a.Category != nil {
-			if len(categories) > 0 && !stringInSlice(*a.Category, categories) {
-				continue
-			}
+		if len(categories) > 0 && (a.Category == nil || !stringInSlice(*a.Category, categories)) {
+			continue
 		}
 		if len(providers) > 0 && !stringInSlice(a.Provider, providers) {
 			continue
