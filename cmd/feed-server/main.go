@@ -25,8 +25,8 @@ func main() {
 	feedService := feed.NewService(storage)
 	articlesDownloader := download.NewDownloader()
 	feedRefreshService := feedrefresh.NewService(storage, articlesDownloader, providerURLs)
-	feedHandler := feed.MakeHttpHandler(feedService)
-	feedrefreshHandler := feedrefresh.MakeHttpHandler(feedRefreshService)
+	feedHandler := feed.MakeHTTPHandler(feedService)
+	feedrefreshHandler := feedrefresh.MakeHTTPHandler(feedRefreshService)
 
 	http.Handle("/feed/", http.StripPrefix("/feed", feedHandler))
 	http.Handle("/feedrefresh/", http.StripPrefix("/feedrefresh", feedrefreshHandler))

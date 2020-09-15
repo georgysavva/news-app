@@ -9,27 +9,27 @@ import (
 )
 
 type Service interface {
-	GetArticles(ctx context.Context, opts ...FeedOption) ([]*article.Article, error)
+	GetArticles(ctx context.Context, opts ...Option) ([]*article.Article, error)
 	GetArticle(ctx context.Context, articleID string) (*article.Article, error)
 	GetProviders(ctx context.Context) ([]string, error)
 	GetCategories(ctx context.Context) ([]string, error)
 }
 
-type FeedOption func(o *feedOptions)
+type Option func(o *options)
 
-type feedOptions struct {
+type options struct {
 	categories []string
 	providers  []string
 }
 
-func WithCategories(categories []string) FeedOption {
-	return func(o *feedOptions) {
+func WithCategories(categories []string) Option {
+	return func(o *options) {
 		o.categories = categories
 	}
 }
 
-func WithProvides(providers []string) FeedOption {
-	return func(o *feedOptions) {
+func WithProvides(providers []string) Option {
+	return func(o *options) {
 		o.providers = providers
 	}
 }
@@ -49,8 +49,8 @@ func NewService(repository Repository) Service {
 	return serviceImpl{repository: repository}
 }
 
-func (s serviceImpl) GetArticles(ctx context.Context, opts ...FeedOption) ([]*article.Article, error) {
-	fo := &feedOptions{}
+func (s serviceImpl) GetArticles(ctx context.Context, opts ...Option) ([]*article.Article, error) {
+	fo := &options{}
 	for _, o := range opts {
 		o(fo)
 	}

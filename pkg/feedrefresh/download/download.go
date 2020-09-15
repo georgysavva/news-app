@@ -13,6 +13,9 @@ import (
 	"github.com/georgysavva/news-app/pkg/article"
 )
 
+// Ideally, this should be configurable.
+const defaultHTTPTimeout = time.Second * 5
+
 type Downloader struct {
 	fp *gofeed.Parser
 }
@@ -20,8 +23,7 @@ type Downloader struct {
 func NewDownloader() Downloader {
 	parser := gofeed.NewParser()
 
-	// Ideally, this should be configurable.
-	parser.Client = &http.Client{Timeout: time.Second * 5}
+	parser.Client = &http.Client{Timeout: defaultHTTPTimeout}
 	return Downloader{fp: parser}
 }
 

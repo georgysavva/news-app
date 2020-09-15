@@ -11,7 +11,7 @@ import (
 	"github.com/georgysavva/news-app/pkg/httputil"
 )
 
-func MakeHttpHandler(s Service) http.Handler {
+func MakeHTTPHandler(s Service) http.Handler {
 	router := mux.NewRouter()
 	hh := httpHandlers{service: s}
 
