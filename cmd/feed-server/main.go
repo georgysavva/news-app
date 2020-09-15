@@ -4,12 +4,15 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/pkg/errors"
+
 	"github.com/georgysavva/news-app/pkg/feed"
 	"github.com/georgysavva/news-app/pkg/feedrefresh"
 	"github.com/georgysavva/news-app/pkg/feedrefresh/download"
 	"github.com/georgysavva/news-app/pkg/inmemory"
 )
 
+// This can come from configs/environment to be more flexible.
 var providerURLs = []string{
 	"http://feeds.bbci.co.uk/news/uk/rss.xml",
 	"http://feeds.bbci.co.uk/news/technology/rss.xml",
@@ -24,7 +27,13 @@ func main() {
 	feedRefreshService := feedrefresh.NewService(storage, articlesDownloader, providerURLs)
 	feedHandler := feed.MakeHttpHandler(feedService)
 	feedrefreshHandler := feedrefresh.MakeHttpHandler(feedRefreshService)
+
 	http.Handle("/feed/", http.StripPrefix("/feed", feedHandler))
 	http.Handle("/feedrefresh/", http.StripPrefix("/feedrefresh", feedrefreshHandler))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	// We could add graceful shutdown here.
+	log.Println("Starting http server on 8080 port")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(errors.Wrap(err, "http server failed"))
+	}
 }
