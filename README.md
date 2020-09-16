@@ -76,7 +76,7 @@ The implementation consists of a single service. It provides a REST API to the c
 
 ### Refresh Feed
 
-  Return list of all providers.
+  Download all available feeds from the providers and replace existing ones in the storage.
 
 * **URL**
 
