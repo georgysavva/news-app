@@ -1,7 +1,7 @@
 # News app
 
 News app is a simple application where users can browse and read articles from various RSS providers. 
-This project is the backend part of it. The only purpose of the project is to demonstrate the basic Go code architecture and approach.
+This project is the backend part of it. The only purpose of the project is to demonstrate the basic Go code architecture and design.
 
 The implementation consists of a single service. It provides a REST API to the client (mobile app) to interact with the domain. This service is also responsible for retrieving new feeds from the providers and refreshing them in its storage, this should be done periodically by some external CRON job to ensure up-to-date content.
 
