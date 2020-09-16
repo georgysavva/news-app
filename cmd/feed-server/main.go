@@ -28,7 +28,7 @@ func main() {
 	feedHandler := feed.MakeHTTPHandler(feedService)
 	feedrefreshHandler := feedrefresh.MakeHTTPHandler(feedRefreshService)
 
-	http.Handle("/feed/", http.StripPrefix("/feed", feedHandler))
+	http.Handle("/v1/feed/", http.StripPrefix("/v1/feed", feedHandler))
 	http.Handle("/feedrefresh/", http.StripPrefix("/feedrefresh", feedrefreshHandler))
 
 	// We could add graceful shutdown here.
